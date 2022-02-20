@@ -2,7 +2,10 @@
 const mongoUtil = require( '../database/Database' );
 const Recipee = require('../models/Recipee');
 const ObjectId = require('mongodb').ObjectId;
- sanitize = require('mongo-sanitize');
+FileHandler = require('../utils/FileHandler')
+const events = require('events');
+const eventEmitter = new events.EventEmitter();
+
 
 class RecipeeController{
 
@@ -16,13 +19,18 @@ class RecipeeController{
         
     }
 
-    async insert(body, res){
+    async insert(name, description, ingridients, image, res){
+            console.log(name)
+            //const parsedData = JSON.parse(body)
+            //console.log(parsedData.ingridients)
 
-            const parsedData = JSON.parse(body)
-            console.log(parsedData.ingridients)
-
-            const recipee = new Recipee(parsedData.name, parsedData.ingridients, parsedData.description, 'CREATE')
+            const recipee = new Recipee(name, JSON.parse(ingridients), description, image, 'CREATE')
             const validationErrors = recipee.validate()
+            if(image){
+                const fileHandler = new FileHandler('/frontend/public/images/')
+                fileHandler.uploader(image)
+            }
+           
             console.log('validation',validationErrors)
             if(validationErrors?.length > 0){
                 res.writeHead(422, {'Content-Type': 'application/json'}).end(JSON.stringify({data : {errors : validationErrors}})); 
@@ -70,7 +78,6 @@ class RecipeeController{
         catch(err){
             res.writeHead(500, {'Content-Type': 'application/json'}).end(JSON.stringify({ message: 'something went wrong' })); 
         }
-        //const files = await db.collection('recipees').insertOne(myobj);
     }
 
     async single(res, param){
@@ -109,14 +116,17 @@ class RecipeeController{
     }
 
     async delete(res, param){
-
-          
+          console.log('param', param)
         try{
+            const recipeeToDelete = await this.db.collection( 'recipees' ).findOne({"_id" : ObjectId(param)});
+            console.log(recipeeToDelete)
             const deletedResponse = await this.db.collection( 'recipees' ).deleteOne({"_id" : ObjectId(param)});
-            console.log(deletedResponse)
+
+            eventEmitter.emit('file-deleted', recipeeToDelete.image);
             res.writeHead(200, this.headers).end(JSON.stringify({data : {deleted : deletedResponse.deletedCount > 0}})); 
         }
         catch(err){
+            console.log(err)
             res.end({message: err.message })
             }
  }
@@ -124,5 +134,14 @@ class RecipeeController{
 
 
 }
+
+eventEmitter.on('file-deleted', function(path) {
+    console.log('path',path)
+    if(path){
+        const fileHandler = new FileHandler('/frontend/public/images/')
+        fileHandler.delete(path)
+    }
+   
+  });
 
 module.exports = RecipeeController

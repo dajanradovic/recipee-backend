@@ -1,5 +1,4 @@
 let url = require('url');
-let sanitizer = require('sanitize')();
 
 function parseUrl(request){
 
@@ -7,6 +6,8 @@ function parseUrl(request){
     let page = urlString.query.page ?? 1;
     let name = urlString.query.name ?? null;
     let ingridients = urlString.query.ingridients ?? null
+    let path = urlString.query.path ?? null
+
    // console.log(urlString.query.page)
     const pathArray = urlString.pathname.split("/");
 
@@ -15,33 +16,23 @@ function parseUrl(request){
                 return [`/${pathArray[1]}/${pathArray[2]}/:id`, pathArray[3], {
                     page,
                     name,
-                    ingridients
+                    ingridients,
+                    path
                 }]
             }
             
             return [`/${pathArray[1]}/${pathArray[2]}`, null, {
                 page,
                 name,
-                ingridients
+                ingridients,
+                path
             }]
 
     }
 }
 
-function sanitizeString(input){
-   return  sanitizer.value(input, String);
-
-}
-
-function sanitizeArray(input){
-    return  sanitizer.value(input, Array);
-
-}
-
-
 
 module.exports = {
-    parseUrl,
-    sanitizeString,
-    sanitizeArray
+    parseUrl
+    
  }

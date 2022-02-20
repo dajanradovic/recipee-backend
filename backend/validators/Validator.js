@@ -42,6 +42,18 @@ class Validator{
 
     }
 
+    imageValidation(field, value, maxSize, mimeTypes){
+        if(value){
+            if(!mimeTypes.includes(value.mimetype)){
+                    this.imageMimeTypeErrorMessage(field, mimeTypes)
+            }
+            if(value.size > maxSize){
+                this.imageSizeErrorMessage(field, maxSize)
+            }
+        }
+
+    }
+
     requiredErrorMessage(field){
         this.errorMessage.push(`${field} field is required`)
     }
@@ -61,6 +73,14 @@ class Validator{
         this.errorMessage.push(`${field} must be an array or array must not be empty`)
     }
 
+    imageMimeTypeErrorMessage(field, mimeTypes){
+        this.errorMessage.push(`${field} must be one of the following mimetype : ${mimeTypes.toString()}`)
+    }
+
+    imageSizeErrorMessage(field, size){
+        this.errorMessage.push(`${field} must smaller than ${size}`)
+    }
+
     validate(){
         throw new Error('You have to implement the method validate!');
     }
@@ -68,7 +88,6 @@ class Validator{
     getFieldsForValidation(){
 
         return [];
-
     }
 
    

@@ -4,15 +4,16 @@ let sanitize = require('mongo-sanitize');
 class Recipee extends Validator{
 
 
-    constructor(name, ingridients, description, type){
+    constructor(name, ingridients, description, image, type){
         super();
-        this.name = sanitizeString(name);
-        this.ingridients = sanitizeArray(ingridients)
-        this.description = sanitizeString(description)
+        this.name = sanitize(name);
+        this.ingridients = ingridients
+        this.description = sanitize(description)
 
         if(type == 'CREATE'){
             this.created_at = new Date()
             this.updated_at = new Date()
+            this.image = image
         }else{
             this.updated_at = new Date()
         }
@@ -21,7 +22,7 @@ class Recipee extends Validator{
 
     getFieldsForValidation(){
 
-        return ['name','ingridients', 'description'];
+        return ['name','ingridients', 'description', 'image'];
     }
 
     validate(){
@@ -32,6 +33,9 @@ class Recipee extends Validator{
             const descriptionMinLength = 2
             const descriptionMaxLength = 300
             const arrayItemMinLength = 2
+            const imageMaxSize = 50000
+            const mimeTypes = ['image/png', 'image/jpg', 'image/jpeg']
+
 
             for(let propertyName in this) {
 
@@ -47,12 +51,17 @@ class Recipee extends Validator{
                         this.minLength(propertyName, this[propertyName], descriptionMinLength)
                         
                     }
-                else if(fieldsToValidate.includes(propertyName) && propertyName == 'ingridients'){
+               else if(fieldsToValidate.includes(propertyName) && propertyName == 'ingridients'){
                         console.log('nutraa array')
                         this.arrayValidation(propertyName, this[propertyName], arrayItemMinLength)
                        
                         
                     }
+                else if(fieldsToValidate.includes(propertyName) && propertyName == 'image'){
+                    console.log('nutraa array')
+                    this.imageValidation(propertyName, this[propertyName], imageMaxSize, mimeTypes)
+                             
+                }
                   
              }
 
@@ -61,10 +70,12 @@ class Recipee extends Validator{
     }
 
     output(){
+        console.log(this.image)
         return {
             'name' : this.name,
             'description' : this.description,
             'ingridients' : this.ingridients,
+            'image' : this.image?.originalFilename,
             'created_at' : this.created_at,
             'updated_at' : this.updated_at
         }

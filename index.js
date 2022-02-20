@@ -4,8 +4,10 @@ const MongoClient = require('mongodb').MongoClient;
 const { parseUrl } = require('./backend/helpers.js')
 RecipeeController = require('./backend/controllers/RecipeeController')
 const mongoUtil = require( './backend/database/Database' );
-const fs = require('fs/promises');
+const fs = require('fs');
 const formidable = require('formidable');
+
+global.__basedir = __dirname;
 
 //database connection
 mongoUtil.connectToServer( function( err, client ) {
@@ -24,22 +26,7 @@ const databaseUrl = process.env.MONGO_DB_CONNECTION_STRING;
   });
 */
 
-async function uploader(req, res){
 
-    console.log('unutra forme')
-    let form = new formidable.IncomingForm();
-    let data = await form.parse(req) 
-    const oldpath = data.openedFiles[0].filepath;
-    const newpath = __dirname + '/frontend/public/images/' + data.openedFiles[0].originalFilename;
-    await fs.rename(oldpath, newpath)
-    console.log('nakon renamea')
-        //res.write('File uploaded and moved!');
-       // res.writeHead(200)
-       // res.end();
-      
-
-
-}
   //server and router
 http.createServer(async function (req, res) {
 
@@ -58,16 +45,19 @@ http.createServer(async function (req, res) {
        try{ 
             let html = fs.readFileSync(__dirname + '/frontend/public/index.html'); 
                 
-            res.wridteHead(200, {"Content-Type": "text/html"})
+            res.writeHead(200, {"Content-Type": "text/html"})
             res.write(html);  
             res.end();  
+            return
 
         }catch(err){
+            console.log(err)
             let html = fs.readFileSync(__dirname + '/frontend/public/error500.html'); 
                      
             res.writeHead(500, {"Content-Type": "text/html"})
             res.write(html);  
-            res.end();  
+            res.end(); 
+            return 
         }
     }
 
@@ -78,47 +68,41 @@ http.createServer(async function (req, res) {
         const [path, pathParam, queryParams] = parseUrl(req);
         console.log(path, pathParam, queryParams)
 
-        if(path ==='/api/upload' && req.method == 'POST') {
-           
-            try{
-            await uploader(req, res)
-            res.writeHead(200, {'Content-Type': 'application/json'}).end(JSON.stringify({ message: 'success' })); 
-            return
-
-            }catch(err){
-                console.log(err)
-            }
-            console.log('gotovo')
-         /*let form=new formidable.IncomingForm(),
-                files=[],
-                fields=[]
-            form.uploadDir=__dirname + '/frontend/public/images/'
-
-            form.on('field', (field, value)=>{
-                fields.push([field, value])
-            })
-            .on('file', (field, file)=>{
-                files.push([field, file])
-            })
-            .on('end', ()=>{
-                console.log(files, fields, 'FT here awefwa', __filename)
-                console.log('Upload terminado')
-                //res.writeHead(200)
-
-                res.end()
-                return
-            })
-            form.parse(req)*/
-        }
 
         if(path ==='/api/recipees' && req.method == 'POST') {
-            req.on('data', function(chunk) {
+
+            let form = new formidable.IncomingForm();
+            let data = form.parse(req) 
+            form.parse(req, async function(err, fields, files) {
+                if (err)  return;
+
                 let recipeeController = new RecipeeController();
-                recipeeController.insert(chunk.toString(), res);
+                recipeeController.insert(fields.name, fields.description, fields.ingridients, files.image, res);
+                return;
+            
               });
+              return;
            
-            //res.end(JSON.stringify({ message: 'Hello from about page' })); 
         }
+        else if(path == '/api/image' && req.method == 'GET'){
+            try{ 
+                 let html = fs.readFileSync(__dirname + '/frontend/public/images/' + queryParams.path); 
+                     
+                 res.writeHead(200, {"Content-Type": "image/jpg"})
+                 res.write(html);  
+                 res.end();  
+                 return
+     
+             }catch(err){
+                 let html = fs.readFileSync(__dirname + '/frontend/public/error500.html'); 
+                          
+                 res.writeHead(500, {"Content-Type": "text/html"})
+                 res.write(html);  
+                 res.end();  
+                 return
+             }
+         }
+
         else if(path ==='/api/recipees/:id' && req.method == 'PUT') {
             let data = '';
             req.on('data', chunk => {
