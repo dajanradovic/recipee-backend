@@ -75,7 +75,7 @@ export default {
             if(this.ingridientsList.includes(this.ingridient)){
                 alert('ingridient already added')
             }
-            else if(this.ingridients.trim() == ''){
+            else if(ingridient.trim() == ''){
                 alert('you must add at least one ingridient')
 
             } else {
