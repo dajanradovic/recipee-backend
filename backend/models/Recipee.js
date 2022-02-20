@@ -3,7 +3,7 @@ let sanitize = require('mongo-sanitize');
 
 class Recipee extends Validator{
 
-    constructor(name, ingridients, description, image, type){
+    constructor(name, ingridients, description, image = null, type){
         super();
         this.name = sanitize(name);
         this.ingridients = ingridients
@@ -74,6 +74,16 @@ class Recipee extends Validator{
             'ingridients' : this.ingridients,
             'image' : this.image?.originalFilename,
             'created_at' : this.created_at,
+            'updated_at' : this.updated_at
+        }
+    }
+
+    updateOutput(){
+        
+        return {
+            'name' : this.name,
+            'description' : this.description,
+            'ingridients' : this.ingridients,
             'updated_at' : this.updated_at
         }
     }

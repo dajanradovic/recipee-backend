@@ -20,31 +20,28 @@ class RecipeeController{
     }
 
     async insert(name, description, ingridients, image, res){
-            console.log(name)
-            //const parsedData = JSON.parse(body)
-            //console.log(parsedData.ingridients)
-
-            const recipee = new Recipee(name, JSON.parse(ingridients), description, image, 'CREATE')
-            const validationErrors = recipee.validate()
-            if(image){
-                const fileHandler = new FileHandler('/frontend/public/images/')
-                fileHandler.uploader(image)
-            }
            
-            console.log('validation',validationErrors)
-            if(validationErrors?.length > 0){
-                res.writeHead(422, {'Content-Type': 'application/json'}).end(JSON.stringify({data : {errors : validationErrors}})); 
-                return;
+        const recipee = new Recipee(name, JSON.parse(ingridients), description, image, 'CREATE')
+        const validationErrors = recipee.validate()
+
+        if(image){
+            const fileHandler = new FileHandler('/frontend/public/images/')
+            fileHandler.uploader(image)
+        }
+        
+        if(validationErrors?.length > 0){
+            res.writeHead(422, {'Content-Type': 'application/json'}).end(JSON.stringify({data : {errors : validationErrors}})); 
+            return;
+        }
+        try{
+            await this.db.collection( 'recipees' ).insertOne(recipee.output());
+            res.writeHead(201, this.headers).end(JSON.stringify({data : recipee})); 
+            return
+        }
+        catch(err){
+            res.writeHead(500, {'Content-Type': 'application/json'}).end(JSON.stringify({ message: 'something went wrong' })); 
+            return
             }
-            try{
-                await this.db.collection( 'recipees' ).insertOne(recipee.output());
-                res.writeHead(201, this.headers).end(JSON.stringify({data : recipee})); 
-                return
-            }
-            catch(err){
-                console.log(err.message)
-                //res.status(422).json({message: err.message })
-                }
     }
 
     async list(res, queryParams){
@@ -56,34 +53,33 @@ class RecipeeController{
 
         try{
                
-        const filterQuery = Recipee.formatFilterQuery(queryParams)
+            const filterQuery = Recipee.formatFilterQuery(queryParams)
 
-        const recipeesCount = await this.db.collection( 'recipees' ).find(filterQuery).count();
+            const recipeesCount = await this.db.collection( 'recipees' ).find(filterQuery).count();
 
-        const meta = {
-            totalItems : recipeesCount,
-            totalPages : Math.ceil(recipeesCount / itemsPerPage),
-            currentPage : page,
-            previousPage : page == 1 ? null : page -1,
-            nextPage: parseInt(recipeesCount > (page * itemsPerPage) ? page + 1 : null)
-        }
+            const meta = {
+                totalItems : recipeesCount,
+                totalPages : Math.ceil(recipeesCount / itemsPerPage),
+                currentPage : page,
+                previousPage : page == 1 ? null : page -1,
+                nextPage: parseInt(recipeesCount > (page * itemsPerPage) ? page + 1 : null)
+            }
 
-        
-        const recipees = await this.db.collection( 'recipees' ).find(filterQuery).skip(startFrom)
-        .limit(itemsPerPage)
-        .toArray();
-                 
-        res.writeHead(200, this.headers).end(JSON.stringify({data : recipees, meta})); 
+            
+            const recipees = await this.db.collection( 'recipees' ).find(filterQuery).sort({"created_at": -1}).skip(startFrom)
+            .limit(itemsPerPage)
+            .toArray();
+                    
+            res.writeHead(200, this.headers).end(JSON.stringify({data : recipees, meta})); 
         }
         catch(err){
             res.writeHead(500, {'Content-Type': 'application/json'}).end(JSON.stringify({ message: 'something went wrong' })); 
-            return
         }
         return
+        
     }
 
     async single(res, param){
-
           
         try{
             const single = await this.db.collection( 'recipees' ).findOne({"_id" : ObjectId(param)});
@@ -92,29 +88,29 @@ class RecipeeController{
         catch(err){
             res.end({message: err.message })
              }
-            return
+        return
           
     }
 
     async update(body, res, param){
 
-           const parsedData = JSON.parse(body)
-           const recipee = new Recipee(parsedData.name, parsedData.ingridients, parsedData.description, 'UPDATE')
+        const parsedData = JSON.parse(body)
+        const recipee = new Recipee(parsedData.name, parsedData.ingridients, parsedData.description, 'UPDATE')
 
-           const validationErrors = recipee.validate()
-           if(validationErrors?.length > 0){
-                res.writeHead(422, {'Content-Type': 'application/json'}).end(JSON.stringify({data : {errors : validationErrors}})); 
-                return;
-           }
+        const validationErrors = recipee.validate()
+
+        if(validationErrors?.length > 0){
+            res.writeHead(422, {'Content-Type': 'application/json'}).end(JSON.stringify({data : {errors : validationErrors}})); 
+            return;
+        }
        
         try{
-            await this.db.collection( 'recipees' ).updateOne({"_id" : ObjectId(param)}, {$set : recipee.output()});
+            await this.db.collection( 'recipees' ).updateOne({"_id" : ObjectId(param)}, {$set : recipee.updateOutput()});
             const updatedRecipee = await this.db.collection( 'recipees' ).findOne({"_id" : ObjectId(param)});
             res.writeHead(200, this.headers).end(JSON.stringify({data : updatedRecipee})); 
         }
         catch(err){
-            //console.log(err.message)
-            res.end({message: err.message })
+            res.writeHead(500, {'Content-Type': 'application/json'}).end(JSON.stringify({ message: 'something went wrong' })); 
             }
         return
     }
@@ -123,15 +119,15 @@ class RecipeeController{
 
         try{
             const recipeeToDelete = await this.db.collection( 'recipees' ).findOne({"_id" : ObjectId(param)});
-            console.log(recipeeToDelete)
             const deletedResponse = await this.db.collection( 'recipees' ).deleteOne({"_id" : ObjectId(param)});
 
             eventEmitter.emit('file-deleted', recipeeToDelete.image);
+
             res.writeHead(200, this.headers).end(JSON.stringify({data : {deleted : deletedResponse.deletedCount > 0}})); 
         }
         catch(err){
-            console.log(err)
-            res.end({message: err.message })
+            res.writeHead(500, {'Content-Type': 'application/json'}).end(JSON.stringify({ message: 'something went wrong' })); 
+
             }
         return
  }

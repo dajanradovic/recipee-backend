@@ -6,6 +6,7 @@
     <div class="row">
           <div v-for="ingridient in ingridientsList" :key="ingridient" class="chip">{{ingridient}}</div>
     </div>
+    <div id="date">created at: {{prettyDate}} 
 </div>
 </template>
 
@@ -22,11 +23,19 @@ export default {
           description: '',
           ingridientsList: [],
           path : '',
-          baseUrl : baseBackendUrl
+          baseUrl : baseBackendUrl,
+          createdAt: ''
         
       }
   },
-  mounted(){
+  computed:{
+      prettyDate(){
+        return new Date(this.createdAt).toLocaleString('en-GB')
+      }
+
+  },
+
+ mounted(){
     
     const id = this.$route.params.id
     if(id){
@@ -38,6 +47,7 @@ export default {
             this.description = res.data.description
             this.ingridientsList = res.data.ingridients
             this.path = res.data.image
+            this.createdAt = res.data.created_at
            })
       }catch(err){
           console.log(err.response.data)
@@ -51,6 +61,8 @@ export default {
 
 <style scoped>
 
-
+#date{
+  font-style: italic;
+}
 
 </style>
