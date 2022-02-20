@@ -10,9 +10,10 @@ cp env.example .env
 
 fill data in .env file (database connection string and database name)
 
-# cd frontend
 
 #build the app
+
+cd frontend
 
 npm run build
 
