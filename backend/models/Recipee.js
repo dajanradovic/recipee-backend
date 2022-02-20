@@ -3,7 +3,6 @@ let sanitize = require('mongo-sanitize');
 
 class Recipee extends Validator{
 
-
     constructor(name, ingridients, description, image, type){
         super();
         this.name = sanitize(name);
@@ -52,14 +51,12 @@ class Recipee extends Validator{
                         
                     }
                else if(fieldsToValidate.includes(propertyName) && propertyName == 'ingridients'){
-                        console.log('nutraa array')
                         this.arrayValidation(propertyName, this[propertyName], arrayItemMinLength)
                        
                         
                     }
                 else if(fieldsToValidate.includes(propertyName) && propertyName == 'image'){
-                    console.log('nutraa array')
-                    this.imageValidation(propertyName, this[propertyName], imageMaxSize, mimeTypes)
+                        this.imageValidation(propertyName, this[propertyName], imageMaxSize, mimeTypes)
                              
                 }
                   
@@ -70,7 +67,7 @@ class Recipee extends Validator{
     }
 
     output(){
-        console.log(this.image)
+        
         return {
             'name' : this.name,
             'description' : this.description,

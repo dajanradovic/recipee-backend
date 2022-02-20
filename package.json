@@ -14,5 +14,8 @@
     "mongo-sanitize": "^1.1.0",
     "mongodb": "^4.3.1",
     "sanitize": "^2.1.0"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1"
   }
 }
