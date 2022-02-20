@@ -22,7 +22,7 @@
                         :path="recipee.image">
         </RecipeeCard>
     </div>
-    <div id="no-data" v-else>No recipees available</div>
+    <div id="no-data" v-if="noData">No recipees available</div>
    <Pagination @fetchNew="fetchNewPage" :pagesCount="meta.totalPages" :currentPage="meta.currentPage"></Pagination>
 
   </div>
@@ -42,7 +42,8 @@ export default {
         return{
                 recipeesList : [],
                 meta: [],
-                searchInput: null
+                searchInput: null,
+                noData : false
         }
   },
   methods:{
@@ -54,6 +55,7 @@ export default {
         apiHandler.getAllRecipees(pageNumber, this.searchInput).then(res => {
             this.recipeesList = res.data
             this.meta = res.meta
+            this.recipeesList.length > 0 ? null : this.noData = true
             this.updateQuery(pageNumber, this.searchInput)
 
            })
