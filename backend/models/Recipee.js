@@ -13,6 +13,7 @@ class Recipee extends Validator{
             this.created_at = new Date()
             this.updated_at = new Date()
             this.image = image
+            this.imageFinalName = new Date().getTime() + image?.originalFilename
         }else{
             this.updated_at = new Date()
         }
@@ -72,7 +73,7 @@ class Recipee extends Validator{
             'name' : this.name,
             'description' : this.description,
             'ingridients' : this.ingridients,
-            'image' : this.image?.originalFilename,
+            'image' : this.imageFinalName,
             'created_at' : this.created_at,
             'updated_at' : this.updated_at
         }

@@ -23,10 +23,10 @@ class RecipeeController{
            
         const recipee = new Recipee(name, JSON.parse(ingridients), description, image, 'CREATE')
         const validationErrors = recipee.validate()
-
+        console.log('finalname', recipee.imageFinalName)
         if(image){
             const fileHandler = new FileHandler('/frontend/public/images/')
-            fileHandler.uploader(image)
+            fileHandler.uploader(image, recipee.imageFinalName)
         }
         
         if(validationErrors?.length > 0){
@@ -34,8 +34,8 @@ class RecipeeController{
             return;
         }
         try{
-            await this.db.collection( 'recipees' ).insertOne(recipee.output());
-            res.writeHead(201, this.headers).end(JSON.stringify({data : recipee})); 
+            let newRecipee = await this.db.collection( 'recipees' ).insertOne(recipee.output());
+            res.writeHead(201, this.headers).end(JSON.stringify({data : {...recipee.output, id: newRecipee._id}})); 
             return
         }
         catch(err){

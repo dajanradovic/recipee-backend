@@ -8,7 +8,7 @@
         <span class="closebtn" @click="closeErrorAlert">&times;</span> 
         <p v-for="error in alertErrors" :key="error">- {{error}}</p>
     </div>
-    <form class="col s12 red lighten-5" v-on:submit.prevent>
+    <div id="fakeForm" class="col s12 red lighten-5">
       <div class="row">
         <div class="col s12">
           <label class="active" for="name">Title</label>
@@ -44,10 +44,10 @@
         </div>
       </div>
      
-      <input v-if="editMode == true" type="submit" class="waves-effect waves-light #ff9800 orange btn" value="Submit changes" @click="onSubmit" />
-      <input v-else type="submit" class="waves-effect waves-light btn" value="Create" @click="onSubmit"/>
+      <button v-if="editMode == true" class="waves-effect waves-light #ff9800 orange btn" @click="onSubmit">Submit changes</button>
+      <button v-else  class="waves-effect waves-light btn" @click="onSubmit">Create</button>
 
-    </form>
+    </div>
     
   </div>
         
@@ -89,6 +89,7 @@ export default {
             let filteredList = this.ingridientsList.filter(singleItem => singleItem !== item)
             this.ingridientsList = filteredList
         },
+
         async onSubmit(){
             if(!this.editMode){
 
@@ -130,34 +131,38 @@ export default {
 
             }
          },
-         closeAlert(){
-           this.alertSuccess = false
-         },
-         closeErrorAlert(){
-           this.alertErrors = []
-         },
-         onFileChange(e) {
-
-          let files = e.target.files || e.dataTransfer.files;
-          if (!files.length)
-            return;
-          this.imageFile = e.target.files[0]  
-          this.createImage(files[0]);
+        closeAlert(){
+          this.alertSuccess = false
         },
-    createImage(file) {
 
-      let image = new Image();
-      let reader = new FileReader();
-      let vm = this;
-  
-      reader.onload = (e) => {
-        vm.image = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    },
-    removeImage: function (e) {
-      this.image = '';
-    }
+        closeErrorAlert(){
+          this.alertErrors = []
+        },
+
+        onFileChange(e) {
+
+        let files = e.target.files || e.dataTransfer.files;
+        if (!files.length)
+          return;
+        this.imageFile = e.target.files[0]  
+        this.createImage(files[0]);
+      },
+
+        createImage(file) {
+
+          let image = new Image();
+          let reader = new FileReader();
+          let vm = this;
+      
+          reader.onload = (e) => {
+            vm.image = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        },
+
+        removeImage: function (e) {
+          this.image = '';
+        }
 
     },
   mounted(){
@@ -248,5 +253,10 @@ export default {
 
     #image-select{
       margin-bottom: 20px;
+    }
+
+    #fakeForm{
+      margin-top:20px;
+      padding: 10px 10px 10px 10px;
     }
 </style>

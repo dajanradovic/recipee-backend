@@ -4,6 +4,8 @@ import RecipeesList from '../components/RecipeesList'
 import RecipeeForm from '../components/RecipeeForm'
 import EditRecipeeForm from '../components/EditRecipeeForm'
 import ReadMore from '../components/ReadMore'
+import Notfound404 from '../components/Notfound404'
+
 
 
 
@@ -25,24 +27,28 @@ export default new Router({
     component: RecipeesList,
     
   },
+  {
+      path: '/recipee/create',
+      name: 'RecipeeForm',
+      component: RecipeeForm,
+      
+    },
     {
-        path: '/recipee/create',
-        name: 'RecipeeForm',
-        component: RecipeeForm,
-        
-      },
-      {
-        path: '/recipee/:id',
-        name: 'ReadMore',
-        component: ReadMore,
-        
-      },
-      {
-        path: '/recipee/:id/edit',
-        name: 'RecipeeEditForm',
-        component: EditRecipeeForm,
-       
-      },
-     ],
+      path: '/recipee/:id',
+      name: 'ReadMore',
+      component: ReadMore,
+      
+    },
+    {
+      path: '/recipee/:id/edit',
+      name: 'RecipeeEditForm',
+      component: EditRecipeeForm,
+      
+    },
+    {
+      path: '*',
+      component: Notfound404
+    }
+  ],
     mode: 'history'
 })

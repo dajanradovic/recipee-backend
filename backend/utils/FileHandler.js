@@ -7,29 +7,27 @@ class FileHandler{
         this.destination = __basedir + path
     }
 
-    async uploader(file){
-        console.log(file)
+    async uploader(file, finalName){
+
          const oldpath = file.filepath;
-         const newpath =  this.destination + file.originalFilename;
+         const newpath =  this.destination + finalName;
 
          try{
             await fs.rename(oldpath, newpath)
          }
          catch(err){
-             console.log(err)
              throw new Error('file upload error')
          }
    }
 
    async delete(name){
-    try{
-        fs.unlink(this.destination + name)
-        
-     }
-     catch(err){
-         console.log(err)
-         throw new Error('file delete error')
-     }
+        try{
+            fs.unlink(this.destination + name)
+            
+        }
+        catch(err){
+            throw new Error('file delete error')
+        }
         
    }
 
