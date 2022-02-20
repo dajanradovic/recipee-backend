@@ -39,6 +39,7 @@ class RecipeeController{
             try{
                 await this.db.collection( 'recipees' ).insertOne(recipee.output());
                 res.writeHead(201, this.headers).end(JSON.stringify({data : recipee})); 
+                return
             }
             catch(err){
                 console.log(err.message)
@@ -71,13 +72,14 @@ class RecipeeController{
         const recipees = await this.db.collection( 'recipees' ).find(filterQuery).skip(startFrom)
         .limit(itemsPerPage)
         .toArray();
-            
-            
+                 
         res.writeHead(200, this.headers).end(JSON.stringify({data : recipees, meta})); 
         }
         catch(err){
             res.writeHead(500, {'Content-Type': 'application/json'}).end(JSON.stringify({ message: 'something went wrong' })); 
+            return
         }
+        return
     }
 
     async single(res, param){
@@ -89,7 +91,8 @@ class RecipeeController{
         }
         catch(err){
             res.end({message: err.message })
-            }
+             }
+            return
           
     }
 
@@ -113,10 +116,11 @@ class RecipeeController{
             //console.log(err.message)
             res.end({message: err.message })
             }
+        return
     }
 
     async delete(res, param){
-          console.log('param', param)
+
         try{
             const recipeeToDelete = await this.db.collection( 'recipees' ).findOne({"_id" : ObjectId(param)});
             console.log(recipeeToDelete)
@@ -129,6 +133,7 @@ class RecipeeController{
             console.log(err)
             res.end({message: err.message })
             }
+        return
  }
 
 
@@ -136,7 +141,7 @@ class RecipeeController{
 }
 
 eventEmitter.on('file-deleted', function(path) {
-    console.log('path',path)
+
     if(path){
         const fileHandler = new FileHandler('/frontend/public/images/')
         fileHandler.delete(path)
