@@ -181,12 +181,24 @@ class Router {
                     return;
                 }
                 
-            //general 404 not found
-            let html = fs.readFileSync(__basedir + '/frontend/public/error404.html');
+            //redirect all to vue app
+            try {
+                let html = fs.readFileSync(__basedir + '/frontend/dist/index.html');
 
-            res.writeHead(500, { "Content-Type": "text/html" })
-            res.write(html);
-            res.end();
+                res.writeHead(200, { "Content-Type": "text/html" })
+                res.write(html);
+                res.end();
+                return
+
+            } catch (err) {
+
+                let html = fs.readFileSync(__basedir + '/frontend/public/error500.html');
+
+                res.writeHead(500, { "Content-Type": "text/html" })
+                res.write(html);
+                res.end();
+                return
+            }
             return
                
 
