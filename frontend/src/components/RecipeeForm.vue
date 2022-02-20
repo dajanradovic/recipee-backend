@@ -74,7 +74,11 @@ export default {
         addIngridient(){
             if(this.ingridientsList.includes(this.ingridient)){
                 alert('ingridient already added')
-            }else {
+            }
+            else if(this.ingridients.trim() == ''){
+                alert('you must add at least one ingridient')
+
+            } else {
 
                 this.ingridientsList.push(this.ingridient)
                 this.ingridient = '';
@@ -104,6 +108,8 @@ export default {
                   this.name = ''
                   this.description = ''
                   this.ingridientsList = []
+                  this.image = '',
+                  this.imageFile = ''
                 }catch(error){
                   this.alertErrors = error.response.data.data.errors
                       }
