@@ -6,21 +6,8 @@ global.__basedir = __dirname;
 
 //database connection
 mongoUtil.connectToServer( function( err, client ) {
-  if (err) console.log(err);
-  // start the rest of your app here
+  if (err) throw new Error('something went wrong');
 } );
-
-
-
-//const databaseUrl = process.env.MONGO_DB_CONNECTION_STRING;
-
-/*MongoClient.connect(databaseUrl, function(err, db) {
-    if (err) throw err;
-    console.log("Database created!");
-   
-    db.close();
-  });
-*/
 
 
   //server and router
