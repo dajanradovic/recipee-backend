@@ -48,7 +48,7 @@ class Router {
             try {
                 let html = fs.readFileSync(__basedir + '/frontend/dist' + req.url);
 
-                res.writeHead(200, { "Content-Type": "text/js" })
+                res.writeHead(200, { "Content-Type": "text/javascript" })
                 res.write(html);
                 res.end();
                 return
